@@ -4,8 +4,8 @@ A bilingual Hong Kong poster archive with an interactive, draggable fisheye post
 
 ## Website and hosting
 
-- GitHub Pages frontend: https://hinm9dy.github.io/Hinsiu/
-- Repository: https://github.com/hinm9dy/Hinsiu
+- GitHub Pages frontend: https://hinm9dy.github.io/hong-kong-poster-archive/
+- Repository: https://github.com/hinm9dy/hong-kong-poster-archive
 - Submission API and authenticated admin: https://poster-archive-2026-hink.candidgrove16.chatgpt.site
 
 GitHub Pages serves the interactive gallery and its assets from `docs/`. It does not run server-side code. Submissions go to the existing API; moderation and contact emails stay behind admin authentication. The public endpoints allow the `https://hinm9dy.github.io` origin without sharing login cookies. Admin routes do not permit cross-origin access.

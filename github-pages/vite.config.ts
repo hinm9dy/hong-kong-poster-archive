@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 
 export default defineConfig({
   root: fileURLToPath(new URL('.', import.meta.url)),
-  base: process.env.PAGES_BASE_PATH || '/Hinsiu/',
+  base: process.env.PAGES_BASE_PATH || '/hong-kong-poster-archive/',
   publicDir: fileURLToPath(new URL('../public', import.meta.url)),
   plugins: [react()],
   css: {postcss: {plugins: []}},
