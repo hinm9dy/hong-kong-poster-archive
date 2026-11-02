@@ -8,7 +8,7 @@ export async function POST(request:Request){
 }
 async function submit(request:Request){
  try{
-  const raw=await boundedBody(request,MAX_FILE_SIZE+65536);
+  const raw=await boundedBody(request,MAX_FILE_SIZE+1_000_000+65536);
   let form:FormData;try{form=await new Response(raw,{headers:{'content-type':request.headers.get('content-type')||''}}).formData();}catch{return json({error:'請用投稿表格提交作品。'},400);}
   const field=(key:string)=>typeof form.get(key)==='string'?String(form.get(key)).trim():'';
   const title=field('title'),designer=field('designer'),email=field('email').toLowerCase(),year=Number(field('year'));
@@ -21,6 +21,8 @@ async function submit(request:Request){
   if(!file||typeof file==='string'||!file.size||file.size>MAX_FILE_SIZE)return json({error:'海報檔案必須為 5MB 或以下。'},400);
   const bytes=new Uint8Array(await file.arrayBuffer()),mime=imageType(bytes);
   if(!mime||mime!==file.type)return json({error:'請上載有效 JPG、PNG 或 WebP 圖片。'},400);
+  const preview=form.get('preview');let previewBytes:Uint8Array|undefined;
+  if(preview&&typeof preview!=='string'){if(!preview.size||preview.size>1_000_000)return json({error:'無效資料。'},400);previewBytes=new Uint8Array(await preview.arrayBuffer());if(imageType(previewBytes)!=='image/jpeg')return json({error:'無效資料。'},400);}
   const now=new Date(),hour=Math.floor(now.getTime()/3600000),identity=request.headers.get('cf-connecting-ip')||email;
   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${hour}:${identity}`));
   const rateKey=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
@@ -29,7 +31,7 @@ async function submit(request:Request){
   await database().prepare('DELETE FROM upload_limits WHERE expires_at < ?').bind(now.getTime()-86400000).run();
   const id=crypto.randomUUID(),objectKey=`posters/${id}`,timestamp=now.toISOString();
   await bucket().put(objectKey,bytes,{httpMetadata:{contentType:mime}});
-  try{await database().prepare("INSERT INTO posters (id,title,designer,year,email,object_key,mime,size,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,'pending',?,?)").bind(id,title,designer,year,email,objectKey,mime,file.size,timestamp,timestamp).run();}catch(e){await bucket().delete(objectKey);throw e;}
+  try{if(previewBytes)await bucket().put(`${objectKey}/preview`,previewBytes,{httpMetadata:{contentType:'image/jpeg'}});await database().prepare("INSERT INTO posters (id,title,designer,year,email,object_key,mime,size,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,'pending',?,?)").bind(id,title,designer,year,email,objectKey,mime,file.size,timestamp,timestamp).run();}catch(e){await bucket().delete([objectKey,`${objectKey}/preview`]);throw e;}
   return json({id,status:'pending'},201);
  }catch(e){if(e instanceof Error&&e.message==='TOO_LARGE')return json({error:'海報檔案必須為 5MB 或以下。'},413);return errorResponse(e);}
 }

@@ -4,13 +4,16 @@ export type Language='zh'|'en';
 const LanguageContext=createContext<{language:Language;setLanguage:(l:Language)=>void;t:(zh:string,en:string)=>string}>({language:'zh',setLanguage:()=>{},t:zh=>zh});
 export function LanguageProvider({children}:{children:React.ReactNode}){
  const [language,setLanguage]=useState<Language>('zh');
- useEffect(()=>{const saved=localStorage.getItem('hkpa-language');if(saved==='zh'||saved==='en')setLanguage(saved);},[]);
+ useEffect(()=>{const saved=new URLSearchParams(location.search).get('lang')||localStorage.getItem('hkpa-language');if(saved==='zh'||saved==='en')setLanguage(saved);},[]);
  useEffect(()=>{document.documentElement.lang=language==='zh'?'zh-Hant-HK':'en';},[language]);
  function change(l:Language){setLanguage(l);localStorage.setItem('hkpa-language',l);}
  return <LanguageContext.Provider value={{language,setLanguage:change,t:(zh,en)=>language==='zh'?zh:en}}>{children}</LanguageContext.Provider>;
 }
 export function useLanguage(){return useContext(LanguageContext);}
 const messages:Record<string,string>={
+ '請上載 JPG、PNG 或 WebP；HEIC 請先轉成 JPG。':'Upload JPG, PNG or WebP. Convert HEIC to JPG first.',
+ '未能處理圖片，請轉成 JPG 再試。':'Unable to prepare this image. Try exporting it as JPG.',
+ '連線未能完成，請重新開啟投稿頁再試。':'Connection failed. Reopen the submission page and try again.',
  '暫時未能處理，請稍後再試。':'Something went wrong. Please try again.',
  '無效來源，請重新載入頁面。':'Please reload the page and try again.',
  '請用投稿表格提交作品。':'Please use the submission form.',

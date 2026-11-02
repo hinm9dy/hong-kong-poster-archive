@@ -64,3 +64,10 @@ Drag with pointer or touch to explore. Arrow keys pan the focused wall. Zoom and
 - The existing abuse throttle is 20 submissions per source per hour; it is separate from collection capacity.
 - `node tests/capacity.mjs` runs only against local preview: uploads 101 exact-5MB PNGs, checks 505 MB of stored records, selects/publishes each, checks incremental counts at 1/12/13/100/101, and retrieves every original byte-for-byte. It leaves clearly labelled local fixtures for browser QA; never point it at production.
 - Verified in local preview on 2026-11-02: all capacity checks passed, 101 list rows, 101 unique wall tiles. Production data was not populated with test fixtures.
+
+## Phone compatibility
+
+- GitHub's Submit button opens the same-origin hosted submission page at `/?view=submit`. This avoids cross-site upload dependencies on mobile browsers.
+- The image picker uses HTMLImageElement and canvas, accepts empty MIME metadata via file extensions, and reports HEIC conversion guidance. Originals remain limited to 5 MB; an additional JPEG display preview is bounded to 1800 px and 1 MB.
+- R2 stores the original and optional `/preview` object. Image requests check publication/admin access before serving either. Existing posters can be repaired with the authenticated Update mobile preview action in curation.
+- Phone-sized browser submission and server preview lifecycle tests passed. A responsive desktop browser is not a real-device iOS test.
