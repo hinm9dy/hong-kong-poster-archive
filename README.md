@@ -55,3 +55,12 @@ Use Node 22.13 or newer and npm. The Sites skill helpers install and build this 
 ## Interaction
 
 Drag with pointer or touch to explore. Arrow keys pan the focused wall. Zoom and reset controls are provided. Reduced-motion preferences disable inertia and perspective. The list inside the menu offers a conventional browse mode with inline image expansion.
+
+## Collection capacity
+
+- The archive has no 12- or 100-poster cap. Each published record adds one list row and one wall tile. No demo fillers or duplicate tiles are added.
+- Images are stored durably in the Site R2 binding, not in GitHub or browser storage. 100 originals at the 5,000,000-byte upload limit need 500 MB. R2 bucket storage grows with usage; no application total-size cap is imposed.
+- Admin shows the total stored poster count and original-file megabytes, including unpublished submissions. Only published records are public.
+- The existing abuse throttle is 20 submissions per source per hour; it is separate from collection capacity.
+- `node tests/capacity.mjs` runs only against local preview: uploads 101 exact-5MB PNGs, checks 505 MB of stored records, selects/publishes each, checks incremental counts at 1/12/13/100/101, and retrieves every original byte-for-byte. It leaves clearly labelled local fixtures for browser QA; never point it at production.
+- Verified in local preview on 2026-11-02: all capacity checks passed, 101 list rows, 101 unique wall tiles. Production data was not populated with test fixtures.
