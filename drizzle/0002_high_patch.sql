@@ -1,0 +1,1 @@
+ALTER TABLE `posters` ADD `deleted_at` text;

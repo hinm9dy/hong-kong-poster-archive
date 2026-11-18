@@ -24,12 +24,18 @@ const edit=(body,headers=auth)=>fetch(origin+'/api/admin/posters/'+id+'/catalog'
 eq((await edit({topics:['art']},{Origin:origin,'Content-Type':'application/json'})).status,403,'Anonymous catalog editing denied');
 eq((await edit({topics:['invalid']})).status,400,'Invalid catalog rejected');
 eq((await edit({topics:['art'],languages:['english'],media:'Screen print'})).status,200,'Curator can edit catalog');
+const download=()=>fetch(origin+'/api/admin/posters/'+id+'/download',{headers:auth});
+const remove=(headers=auth)=>fetch(origin+'/api/admin/posters/'+id,{method:'DELETE',headers});
+eq((await fetch(origin+'/api/admin/posters/'+id+'/download')).status,403,'Anonymous original download denied');
+eq((await remove({Origin:origin})).status,403,'Anonymous delete denied');
+eq((await remove({...auth,Origin:'https://untrusted.example'})).status,403,'Cross-origin delete denied');
+r=await download();eq(r.status,200,'Curator can download original');eq(r.headers.get('content-disposition').startsWith('attachment;'),true,'Original is downloaded as attachment');eq(new Uint8Array(await r.arrayBuffer()),maximum,'Downloaded original preserves exact bytes');
 const patch=(status,previousStatus,headers=auth)=>fetch(origin+'/api/admin/posters/'+id,{method:'PATCH',headers,body:JSON.stringify({status,previousStatus})});
 r=await patch('selected','pending',{Origin:origin,'Content-Type':'application/json'});eq(r.status,403,'Anonymous visitors cannot curate');
 r=await patch('published','pending');eq(r.status,400,'Publication requires selection first');
-r=await patch('selected','pending');eq(r.status,200,'Curator can select a poster');
+r=await patch('selected','pending');eq(r.status,200,'Curator can select a poster');eq((await remove()).status,409,'Selected poster protected from deletion');
 r=await fetch(origin+'/api/posters');listing=await r.json();eq(listing.posters.some(p=>p.id===id),false,'Selected draft remains private until publication');
-r=await patch('published','selected');eq(r.status,200,'Curator can publish a selected poster');
+r=await patch('published','selected');eq(r.status,200,'Curator can publish a selected poster');eq((await remove()).status,409,'Published poster protected from deletion');
 r=await fetch(origin+'/api/posters');listing=await r.json();const publicPoster=listing.posters.find(p=>p.id===id);eq(publicPoster.catalog.media,'Screen print','Published catalog reflects curator edits');eq(Boolean(publicPoster),true,'Published poster appears in archive');eq(Object.keys(publicPoster).sort(),['catalog','designer','id','image','title','year'],'Public API excludes email and private fields');
 r=await fetch(origin+'/api/images/'+id);eq(r.status,200,'Published image is available');eq(r.headers.get('content-type'),'image/png','Image served with correct MIME');
 r=await patch('published','selected');eq(r.status,409,'Stale moderation action does not overwrite state');
@@ -37,4 +43,5 @@ r=await patch('selected','published');eq(r.status,200,'Curator can unpublish wit
 r=await fetch(origin+'/api/images/'+id);eq(r.status,404,'Unpublished image becomes private immediately');
 r=await patch('rejected','selected');eq(r.status,200,'Curator can move selected draft to not selected');
 r=await patch('pending','rejected');eq(r.status,200,'Not selected decision is reversible');
+eq((await remove()).status,200,'Curator can delete pending poster');eq((await download()).status,404,'Deleted original cannot be downloaded');eq((await fetch(origin+'/api/images/'+id,{headers:auth})).status,404,'Deleted image inaccessible even to curator');const afterDelete=await (await fetch(origin+'/api/admin/posters',{headers:auth})).json();eq(afterDelete.posters.some(p=>p.id===id),false,'Deleted submission removed from admin');
 console.log(`\n${checks} integration checks passed. Fixture ID: ${id}`);
