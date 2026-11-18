@@ -1,0 +1,1 @@
+ALTER TABLE `posters` ADD `catalog` text DEFAULT '{}' NOT NULL;

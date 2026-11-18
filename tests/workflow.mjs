@@ -3,7 +3,7 @@ const origin=process.env.TEST_ORIGIN||'http://127.0.0.1:5173';
 if(!/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin))throw new Error('This test creates fixtures and is restricted to local preview.');
 const png=Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64'));
 let checks=0;function eq(actual,expected,label){assert.deepEqual(actual,expected,label);checks++;console.log('PASS',label);}
-function form(bytes=png,type='image/png'){const f=new FormData();f.set('title','QA — Local workflow fixture');f.set('designer','QA Test');f.set('email','archive-qa@example.test');f.set('year','2026');f.set('consent','yes');f.set('file',new Blob([bytes],{type}),'fixture.png');return f;}
+function form(bytes=png,type='image/png'){const f=new FormData();f.set('title','QA — Local workflow fixture');f.set('designer','QA Test');f.set('email','archive-qa@example.test');f.set('year','2026');f.set('consent','yes');f.set('topics','music');f.set('languages','chinese');f.set('media','Printed poster');f.set('rights','All rights reserved');f.set('file',new Blob([bytes],{type}),'fixture.png');return f;}
 async function upload(f=form(),extra={}){return fetch(origin+'/api/submissions',{method:'POST',headers:{Origin:origin,...extra},body:f});}
 let r=await fetch(origin+'/api/admin/posters');eq(r.status,403,'Anonymous visitors cannot read admin email list');
 r=await upload(form(),{Origin:'https://untrusted.example'});eq(r.status,403,'Cross-origin uploads rejected');
@@ -19,13 +19,18 @@ r=await fetch(origin+'/api/images/'+id);eq(r.status,404,'Pending original image 
 r=await fetch(origin+'/signin-with-chatgpt?return_to=/admin',{redirect:'manual'});const cookie=r.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ');assert.ok(cookie,'Local mock login cookie');
 const auth={Cookie:cookie,Origin:origin,'Content-Type':'application/json'};
 r=await fetch(origin+'/api/admin/posters',{headers:auth});let admin=await r.json();eq(r.status,200,'Authorized curator can read submissions');eq(admin.posters.find(p=>p.id===id).email,'archive-qa@example.test','Email available to curator');
+eq(admin.posters.find(p=>p.id===id).catalog.media,'Printed poster','Catalog persists with submission');
+const edit=(body,headers=auth)=>fetch(origin+'/api/admin/posters/'+id+'/catalog',{method:'PUT',headers,body:JSON.stringify(body)});
+eq((await edit({topics:['art']},{Origin:origin,'Content-Type':'application/json'})).status,403,'Anonymous catalog editing denied');
+eq((await edit({topics:['invalid']})).status,400,'Invalid catalog rejected');
+eq((await edit({topics:['art'],languages:['english'],media:'Screen print'})).status,200,'Curator can edit catalog');
 const patch=(status,previousStatus,headers=auth)=>fetch(origin+'/api/admin/posters/'+id,{method:'PATCH',headers,body:JSON.stringify({status,previousStatus})});
 r=await patch('selected','pending',{Origin:origin,'Content-Type':'application/json'});eq(r.status,403,'Anonymous visitors cannot curate');
 r=await patch('published','pending');eq(r.status,400,'Publication requires selection first');
 r=await patch('selected','pending');eq(r.status,200,'Curator can select a poster');
 r=await fetch(origin+'/api/posters');listing=await r.json();eq(listing.posters.some(p=>p.id===id),false,'Selected draft remains private until publication');
 r=await patch('published','selected');eq(r.status,200,'Curator can publish a selected poster');
-r=await fetch(origin+'/api/posters');listing=await r.json();const publicPoster=listing.posters.find(p=>p.id===id);eq(Boolean(publicPoster),true,'Published poster appears in archive');eq(Object.keys(publicPoster).sort(),['designer','id','image','title','year'],'Public API excludes email and private fields');
+r=await fetch(origin+'/api/posters');listing=await r.json();const publicPoster=listing.posters.find(p=>p.id===id);eq(publicPoster.catalog.media,'Screen print','Published catalog reflects curator edits');eq(Boolean(publicPoster),true,'Published poster appears in archive');eq(Object.keys(publicPoster).sort(),['catalog','designer','id','image','title','year'],'Public API excludes email and private fields');
 r=await fetch(origin+'/api/images/'+id);eq(r.status,200,'Published image is available');eq(r.headers.get('content-type'),'image/png','Image served with correct MIME');
 r=await patch('published','selected');eq(r.status,409,'Stale moderation action does not overwrite state');
 r=await patch('selected','published');eq(r.status,200,'Curator can unpublish without deleting');

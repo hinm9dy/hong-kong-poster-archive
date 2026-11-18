@@ -1,3 +1,4 @@
+import {catalogFromForm} from '../../lib/catalog';
 import {database,bucket,json,errorResponse,imageType,boundedBody} from '../../lib/server';
 import {publicOriginAllowed,publicResponse,publicPreflight} from '../../lib/public-access';
 import {MAX_FILE_SIZE} from '../../lib/types';
@@ -17,6 +18,7 @@ async function submit(request:Request){
   if(!Number.isInteger(year)||year<1900||year>new Date().getUTCFullYear())return json({error:'請輸入有效製作年份（1900 至今年）。'},400);
   if(field('consent')!=='yes')return json({error:'請確認你有權提交作品及同意入選後展示。'},400);
   if(field('website'))return json({error:'未能接受此投稿。'},400);
+  let catalog;try{catalog=catalogFromForm(form);}catch{return json({error:'無效資料。'},400);}
   const file=form.get('file');
   if(!file||typeof file==='string'||!file.size||file.size>MAX_FILE_SIZE)return json({error:'海報檔案必須為 5MB 或以下。'},400);
   const bytes=new Uint8Array(await file.arrayBuffer()),mime=imageType(bytes);
@@ -31,7 +33,7 @@ async function submit(request:Request){
   await database().prepare('DELETE FROM upload_limits WHERE expires_at < ?').bind(now.getTime()-86400000).run();
   const id=crypto.randomUUID(),objectKey=`posters/${id}`,timestamp=now.toISOString();
   await bucket().put(objectKey,bytes,{httpMetadata:{contentType:mime}});
-  try{if(previewBytes)await bucket().put(`${objectKey}/preview`,previewBytes,{httpMetadata:{contentType:'image/jpeg'}});await database().prepare("INSERT INTO posters (id,title,designer,year,email,object_key,mime,size,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,'pending',?,?)").bind(id,title,designer,year,email,objectKey,mime,file.size,timestamp,timestamp).run();}catch(e){await bucket().delete([objectKey,`${objectKey}/preview`]);throw e;}
+  try{if(previewBytes)await bucket().put(`${objectKey}/preview`,previewBytes,{httpMetadata:{contentType:'image/jpeg'}});await database().prepare("INSERT INTO posters (id,title,designer,year,email,object_key,mime,size,status,created_at,updated_at,catalog) VALUES (?,?,?,?,?,?,?,?,'pending',?,?,?)").bind(id,title,designer,year,email,objectKey,mime,file.size,timestamp,timestamp,JSON.stringify(catalog)).run();}catch(e){await bucket().delete([objectKey,`${objectKey}/preview`]);throw e;}
   return json({id,status:'pending'},201);
  }catch(e){if(e instanceof Error&&e.message==='TOO_LARGE')return json({error:'海報檔案必須為 5MB 或以下。'},413);return errorResponse(e);}
 }
