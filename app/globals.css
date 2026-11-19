@@ -15,3 +15,27 @@
 @media(min-width:1700px){.poster-row h2{font-size:50px}}
 @media(max-width:760px){.brand{font-size:11px}.poster-row h2{font-size:clamp(13.5px,3.6vw,24px);letter-spacing:-.5px}.catalog-filters{padding-top:130px}.catalog-filters button{font-size:12px;padding:6px 9px}.catalog-filters span{width:100%;font-size:13px}.view-list .poster-list{padding-top:30px}.catalog-details dt{font-size:12px}.catalog-details dd{font-size:15px}.poster-expanded{grid-template-columns:1fr}.expanded-metadata{padding-top:15px}.catalog-details{display:grid;grid-template-columns:1fr 1fr;gap:15px}.catalog-details>div{margin:0}.catalog-details>div:nth-last-child(-n+2){grid-column:1/-1}.catalog-filters{background:linear-gradient(var(--paper) 80%,transparent)}}
 .catalog-fields input:not([type=checkbox]),.catalog-fields textarea{display:block;width:100%;padding:10px 0;border:0;border-bottom:1px solid #999;background:transparent;font:inherit;font-size:16px;border-radius:0}.catalog-fields textarea{border:1px solid #999;padding:10px;margin-top:10px;resize:vertical}.catalog-fields input[type=checkbox]{width:auto}
+/* List layout based on the supplied November 19 design. */
+.view-list .site-header{padding-top:4vw}
+.view-list .catalog-filters{padding-top:clamp(140px,10.68vw,184px)}
+.view-list .catalog-filters>div{margin-bottom:0}
+.view-list .poster-list{padding-top:36px}
+.poster-row{border-top:1.5px solid var(--ink)}
+.poster-row:last-child{border-bottom:1.5px solid var(--ink)}
+.poster-row-toggle{display:grid;grid-template-columns:minmax(0,4.2fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,1fr) minmax(0,2.3fr) 64px;min-height:132px;gap:24px;padding:25px 8px;align-items:start}
+.list-title,.list-cell{display:flex;flex-direction:column;min-width:0}
+.list-label{font-family:Arial,'Noto Sans TC',sans-serif;font-size:14px;line-height:1.35;font-weight:400;letter-spacing:-.2px}
+.poster-row h2{font-size:52px;line-height:1.05;letter-spacing:-1px;font-weight:400;white-space:normal;overflow-wrap:anywhere;margin:3px 0 0}
+.list-cell .list-label{margin-bottom:14px}
+.list-value{font-size:21px;line-height:1.2;overflow-wrap:anywhere}
+.list-creator,.list-media,.list-year{text-align:center}
+.list-description .list-label{margin-bottom:5px}
+.list-description .list-value{font-size:16px;line-height:1.08;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.row-disclosure{display:flex;align-self:center;justify-content:center;transition:transform .2s}
+.row-disclosure svg{width:64px;height:64px;stroke-width:.8;stroke-linecap:square;stroke-linejoin:miter}
+.poster-row.expanded .row-disclosure{transform:rotate(180deg)}
+.poster-row-toggle:hover .row-disclosure{opacity:.6}
+@media(min-width:761px) and (max-width:1100px){.poster-row-toggle{grid-template-columns:minmax(0,2.7fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,2fr) 36px;gap:15px}.poster-row h2{font-size:38px}.list-value{font-size:18px}.row-disclosure svg{width:36px;height:36px}}
+@media(max-width:760px){.view-list .site-header{padding-top:27px}.view-list .catalog-filters{padding-top:130px}.view-list .poster-list{padding-top:30px}.poster-row-toggle{grid-template-columns:repeat(3,minmax(0,1fr)) 24px;gap:22px 12px;padding:24px 0;min-height:0}.list-title{grid-column:1/4}.poster-row h2{font-size:36px;letter-spacing:-.6px}.list-label{font-size:14px;letter-spacing:0}.list-cell .list-label{margin-bottom:7px}.list-value{font-size:17px}.list-creator{grid-row:2;grid-column:1;text-align:left}.list-media{grid-row:2;grid-column:2;text-align:left}.list-year{grid-row:2;grid-column:3/5;text-align:left}.list-description{grid-row:3;grid-column:1/-1}.list-description .list-value{font-size:16px;line-height:1.35}.row-disclosure{grid-row:1;grid-column:4;align-self:center}.row-disclosure svg{width:28px;height:28px}}
+
+@media(min-width:761px){.view-list{--page-margin:4vw}.view-list .brand{font-size:clamp(16px,1.65vw,29px)}.view-list .header-submit{font-size:clamp(28px,3vw,48px)}.view-list .catalog-filters span{font-size:18px}.view-list .catalog-filters button{font-size:16px;padding:6px 14px}.row-disclosure svg{width:80px;height:64px;flex-shrink:0}.view-list .catalog-filters{padding-top:clamp(140px,10.68vw,184px)}}
