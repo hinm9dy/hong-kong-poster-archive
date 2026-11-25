@@ -39,3 +39,7 @@
 @media(max-width:760px){.view-list .site-header{padding-top:27px}.view-list .catalog-filters{padding-top:130px}.view-list .poster-list{padding-top:30px}.poster-row-toggle{grid-template-columns:repeat(3,minmax(0,1fr)) 24px;gap:22px 12px;padding:24px 0;min-height:0}.list-title{grid-column:1/4}.poster-row h2{font-size:36px;letter-spacing:-.6px}.list-label{font-size:14px;letter-spacing:0}.list-cell .list-label{margin-bottom:7px}.list-value{font-size:17px}.list-creator{grid-row:2;grid-column:1;text-align:left}.list-media{grid-row:2;grid-column:2;text-align:left}.list-year{grid-row:2;grid-column:3/5;text-align:left}.list-description{grid-row:3;grid-column:1/-1}.list-description .list-value{font-size:16px;line-height:1.35}.row-disclosure{grid-row:1;grid-column:4;align-self:center}.row-disclosure svg{width:28px;height:28px}}
 
 @media(min-width:761px){.view-list{--page-margin:4vw}.view-list .brand{font-size:clamp(16px,1.65vw,29px)}.view-list .header-submit{font-size:clamp(28px,3vw,48px)}.view-list .catalog-filters span{font-size:18px}.view-list .catalog-filters button{font-size:16px;padding:6px 14px}.row-disclosure svg{width:80px;height:64px;flex-shrink:0}.view-list .catalog-filters{padding-top:clamp(140px,10.68vw,184px)}}
+
+.poster-row.expanded .list-title,.poster-row.expanded .list-cell{display:none}
+.poster-row.expanded .poster-row-toggle{display:flex;justify-content:flex-end;min-height:56px;padding:0 8px}
+.poster-row.expanded .row-disclosure{height:56px;align-items:center}
